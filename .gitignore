@@ -1,0 +1,12 @@
+# Ce depot ne contient que le template : wesnothd vient du paquet Debian
+# wesnoth-1.18-server, installe dans le conteneur. Rien de ce qui suit ne doit y entrer.
+wesnoth/
+wesnothd.cfg
+perso.cfg
+bans.cfg.gz
+*.fifo
+replays/
+__pycache__/
+
+# Notes internes de TeamKit (essais, etapes), pas dans le depot public
+FAISABILITE.md

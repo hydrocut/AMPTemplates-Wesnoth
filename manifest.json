@@ -1,0 +1,12 @@
+{
+    "id": "6b0e672e-f6c5-5532-bd53-34e0b3d3f399",
+    "authors": [
+        "Hydrocut",
+        "TeamKit"
+    ],
+    "origin": "https://github.com/hydrocut/AMPTemplates-Wesnoth.git",
+    "url": "https://github.com/hydrocut/AMPTemplates-Wesnoth",
+    "imagefile": "",
+    "prefix": "TeamKitWesnoth",
+    "repotype": "AppTemplates"
+}

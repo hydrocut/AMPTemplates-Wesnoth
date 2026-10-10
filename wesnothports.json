@@ -1,0 +1,9 @@
+[
+    {
+        "Protocol": "TCP",
+        "Port": 15000,
+        "Ref": "ServerPort",
+        "Name": "Port du jeu",
+        "Description": "Seul port a ouvrir, en TCP. 15000 est le port par defaut de Wesnoth : un joueur qui tape seulement l'IP dans Se connecter au serveur arrive dessus. Sur un autre port, il faut taper IP:port."
+    }
+]

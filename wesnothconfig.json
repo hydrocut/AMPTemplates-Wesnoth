@@ -1,0 +1,53 @@
+[
+    {
+        "DisplayName": "Message d'accueil",
+        "Category": "Wesnoth:public",
+        "Subcategory": "Serveur:dns:1",
+        "Description": "Affiché dans le salon à chaque joueur qui se connecte. Accents, virgules, apostrophes, accolades et # passent tels quels. Les guillemets droits \" sont remplacés par ' au démarrage et >> par > > : tels quels, ils empêchent les joueurs d'entrer. Vide = pas de message.",
+        "Keywords": "accueil,bienvenue,welcome,motd,message",
+        "FieldName": "motd",
+        "InputType": "text",
+        "ParamFieldName": "motd",
+        "DefaultValue": "Serveur francophone hébergé gratuitement par TeamKit.fr — teamkit.fr · Discord : discord.gg/EuAjGMYPHY",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Mot de passe administrateur",
+        "Category": "Wesnoth:public",
+        "Subcategory": "Accès et administration:lock:2",
+        "Description": "Dans le salon multijoueur, un joueur tape /query admin suivi de ce mot de passe pour devenir administrateur du serveur (kick, ban, msg, status… puis /query help pour la liste). Vide = personne ne peut le devenir en jeu ; la console d'AMP reste administratrice dans tous les cas. Une tentative ratée s'affiche dans la console AVEC le mot de passe tapé. Évite le guillemet droit \" et >>.",
+        "Keywords": "admin,administrateur,mot de passe,password,passwd,moderateur",
+        "FieldName": "passwd",
+        "InputType": "password",
+        "ParamFieldName": "passwd",
+        "DefaultValue": "",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Versions du jeu acceptées",
+        "Category": "Wesnoth:public",
+        "Subcategory": "Accès et administration:lock:2",
+        "Description": "Versions des joueurs autorisées, séparées par des virgules ; * = n'importe quels caractères, ? = un seul. Par défaut, 1.18.8 et les suivantes (1.18.9, 1.18.10…) : la version Steam actuelle. Les 1.18 plus anciennes ont une faille de sécurité côté joueur, corrigée en 1.18.8 (annonce des développeurs du 18/08/2026), et les serveurs officiels les bloquent aussi. 1.18.* = accepter toutes les 1.18 quand même (ex. Wesnoth des dépôts Linux). Un client refusé reçoit cette liste. Ne pas ouvrir à une autre série (1.16, 1.19, 1.20…) : le serveur est en 1.18. Vide = 1.18.*. Pas de guillemet droit \" ni de >>.",
+        "Keywords": "version,versions,accepted,1.18,client,compatibilite",
+        "FieldName": "versions_accepted",
+        "InputType": "text",
+        "ParamFieldName": "versions_accepted",
+        "DefaultValue": "1.18.8,1.18.9,1.18.1?",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Connexions par adresse IP",
+        "Category": "Wesnoth:public",
+        "Subcategory": "Accès et administration:lock:2",
+        "Description": "Nombre maximal de connexions simultanées depuis une même adresse IP (défaut de Wesnoth : 5). Au-delà, le joueur reçoit « Too many connections from your IP ». À monter pour une LAN où tout le monde sort par la même box. wesnothd n'a pas de limite globale de joueurs ni de parties.",
+        "Keywords": "connexions,ip,limite,connections_allowed,anti-abus",
+        "FieldName": "connections_allowed",
+        "InputType": "number",
+        "MinValue": "1",
+        "MaxValue": "100",
+        "ParamFieldName": "connections_allowed",
+        "DefaultValue": "5",
+        "Suffix": "connexions",
+        "EnumValues": {}
+    }
+]

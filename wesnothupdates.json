@@ -1,0 +1,32 @@
+[
+    {
+        "UpdateStageName": "Verification de wesnothd 1.18",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "-c \"if [ -x /usr/games/wesnothd-1.18 ]; then /usr/games/wesnothd-1.18 --version; else echo \\\"ERREUR : /usr/games/wesnothd-1.18 absent. Cette instance doit tourner en conteneur (le paquet wesnoth-1.18-server est installe par ExtraContainerPackages).\\\"; exit 1; fi\"",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Modele des reglages (AMP_wesnothd.cfg)",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "https://raw.githubusercontent.com/hydrocut/AMPTemplates-Wesnoth/main/scripts/AMP_wesnothd.cfg",
+        "UpdateSourceArgs": "AMP_wesnothd.cfg",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "UnzipUpdateSource": false,
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Script de lancement",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "https://raw.githubusercontent.com/hydrocut/AMPTemplates-Wesnoth/main/scripts/lancer-wesnothd.sh",
+        "UpdateSourceArgs": "lancer-wesnothd.sh",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "UnzipUpdateSource": false,
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    }
+]

@@ -1,0 +1,3 @@
+# Les scripts sont lus par bash et wesnothd dans le conteneur : toujours en LF.
+*.sh text eol=lf
+*.cfg text eol=lf

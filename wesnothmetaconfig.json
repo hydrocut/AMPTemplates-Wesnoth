@@ -1,0 +1,8 @@
+[
+    {
+        "ConfigFile": "wesnothd.cfg",
+        "ConfigType": "template",
+        "AutoMap": true,
+        "ConfigFileTemplate": "wesnoth/AMP_wesnothd.cfg"
+    }
+]
