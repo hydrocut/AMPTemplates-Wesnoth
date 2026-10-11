@@ -95,7 +95,8 @@ and `{./perso.cfg}` as the last line, a file the script creates once and never o
 other wesnothd key (`save_replays`, `disallow_names`, `max_messages`…; list in `load_config()` of
 `src/server/wesnothd/server.cpp`).
 
-**wesnothd has no global player or game limit**, so none is exposed and `App.MaxUsers=0`.
+**wesnothd has no global player or game limit**, so none is exposed. `App.MaxUsers=30` is only the
+capacity AMP and the TeamKit site display: 30 players at once is the load tested (17 MB of RAM).
 There is no user database either (`[user_handler]` needs MariaDB and the forum tables): nicknames
 are first come, first served, and names containing `admin`, `server`, `moderator` are refused by
 default (tested: `Admin` → *reserved*).
@@ -113,8 +114,10 @@ AMP writes values verbatim. The config file goes through the **WML preprocessor*
 | `>>` | | ends the raw string early |
 
 All tested on wesnothd 1.18.5. So every text is a WML raw string, and the start script replaces,
-in the motd only, `"` with `'` and `>>` with `> >`, with a console notice. For the admin password
-and the version list the description asks to avoid `"` and `>>`.
+in the motd only, `"` with `'` and `>>` with `> >`, with a console notice. The admin password and
+the version list are not rewritten (that would silently change the password): a `>>` or a final `>`
+in them stops the start script with a French error naming the setting. The description also asks to
+avoid `"`.
 
 ## Console and player list
 

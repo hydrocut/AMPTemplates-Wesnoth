@@ -167,10 +167,20 @@ def rendre(valeurs):
     return t
 
 
+class Refus(Exception):
+    pass
+
+
 def corriger_comme_le_lanceur(t):
-    # Même travail que le awk de lancer-wesnothd.sh sur la ligne motd.
+    # Même travail que le awk de lancer-wesnothd.sh : corrige la ligne motd, refuse
+    # >> ou un > final dans passwd et versions_accepted (Refus = le lanceur s'arrête).
     sortie = []
     for l in t.splitlines():
+        for cle in ('passwd', 'versions_accepted'):
+            if l.startswith(cle + '=<<') and l.endswith('>>') and len(l) >= len(cle) + 5:
+                v = l[len(cle) + 3:-2]
+                if '>>' in v or v.endswith('>'):
+                    raise Refus(cle)
         if l.startswith('motd=<<') and l.endswith('>>') and len(l) >= 9:
             v = l[7:-2].replace('"', "'")
             while '>>' in v:
@@ -231,6 +241,23 @@ for p, c in params.items():
             n += 1
             if relire(rendre(vals), p) != v:
                 soucis.append('aller-retour %s : %r' % (p, v))
+# ce que le lanceur doit refuser (mot de passe et versions : les modifier changerait leur sens)
+REFUSES = ['a>>b', 'abc>', 'a >>> b', '>>']
+for p in ('passwd', 'versions_accepted'):
+    for v in REFUSES:
+        vals = dict(defauts)
+        vals[p] = v
+        n += 1
+        try:
+            corriger_comme_le_lanceur(rendre(vals))
+            soucis.append('%s = %r : le lanceur devrait refuser' % (p, v))
+        except Refus:
+            pass
+    vals = dict(defauts)
+    vals[p] = 'a > b'
+    n += 1
+    if relire(corriger_comme_le_lanceur(rendre(vals)), p) != 'a > b':
+        soucis.append('%s : un > isolé doit passer tel quel' % p)
 for p in ('passwd', 'versions_accepted'):
     if '>>' not in params[p]['Description'] and '"' not in params[p]['Description']:
         soucis.append('%s : la description doit prévenir pour " et >>' % p)
@@ -302,6 +329,43 @@ if bash:
         print('ok   bash -n                  %s' % LANCEUR)
 else:
     print('--   bash -n                  pas de bash ici, syntaxe non vérifiée')
+# Le vrai awk du lanceur, face au miroir Python ci-dessus (section 5).
+awk = shutil.which('awk')
+debut = lanceur.find('awk -v fifo="$FIFO" -v q="\'" \'\n')
+fin = lanceur.find('\n\' "$CFG" > "$CFG.tmp"\n', debut)
+prog = lanceur[lanceur.index('\n', debut) + 1:fin + 1] if 0 <= debut < fin else None
+if not prog:
+    soucis.append('lanceur : bloc awk introuvable (le vérificateur ne sait plus le tester)')
+elif awk:
+    import tempfile
+    k = 0
+    avant = len(soucis)
+    # Programme dans un fichier (-f), fifo et q posées par un BEGIN au lieu de -v : sous
+    # Windows (Git Bash), un argument multiligne ou une apostrophe seule sont abîmés.
+    with tempfile.NamedTemporaryFile('w', suffix='.awk', delete=False, encoding='utf-8', newline='\n') as f:
+        f.write('BEGIN { fifo = "x.fifo"; q = sprintf("%c", 39) }\n' + prog)
+    fichier_awk = f.name.replace('\\', '/')
+    for p, v in [('motd', 'Dites "bonjour" >> a >'), ('passwd', 'secret > ok'), ('passwd', 'a>>b'), ('passwd', 'fin>'),
+                 ('versions_accepted', '1.18.*'), ('versions_accepted', '1.18.*>>')]:
+        vals = dict(defauts)
+        vals[p] = v
+        t = rendre(vals)
+        try:
+            attendu, code_attendu = corriger_comme_le_lanceur(t).replace('fifo_path="remplace au demarrage par lancer-wesnothd.sh"', 'fifo_path="x.fifo"'), 0
+        except Refus:
+            attendu, code_attendu = None, 3
+        r = subprocess.run([awk, '-f', fichier_awk], input=t + '\n',
+                           capture_output=True, text=True, encoding='utf-8')
+        k += 1
+        if r.returncode != code_attendu or (attendu is not None and r.stdout.rstrip('\n') != attendu):
+            soucis.append('awk du lanceur, %s = %r : code %d au lieu de %d' % (p, v, r.returncode, code_attendu))
+        elif code_attendu == 3 and 'ERREUR' not in r.stderr:
+            soucis.append('awk du lanceur, %s = %r : refus sans message' % (p, v))
+    os.remove(f.name)
+    if len(soucis) == avant:
+        print('ok   awk du lanceur           %d essais, mêmes résultats que le miroir Python' % k)
+else:
+    print('--   awk                      pas de awk ici, bloc du lanceur non exécuté')
 
 # ── 8. regex de console sur de vraies lignes (wesnothd 1.18.5, 10/10/2026) ────
 pret_ligne = 'TeamKit : wesnothd pret, il ecoute sur le port 15000.'

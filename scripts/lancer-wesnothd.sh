@@ -36,6 +36,9 @@ fi
 # Message d'accueil : wesnothd le renvoie a chaque joueur sans echapper les
 # guillemets droits, et la connexion echoue (essai du 10/10/2026). Un >> fermerait
 # la chaine brute <<...>> trop tot. On remplace donc " par ' et >> par > >.
+# Mot de passe admin et versions acceptees : un >> (ou un > final) y aurait le meme
+# effet et wesnothd s'arreterait au demarrage (abort, code 134). Les modifier
+# changerait le mot de passe sans le dire : on refuse avec un message (code 3).
 awk -v fifo="$FIFO" -v q="'" '
   /^motd=<<.*>>$/ {
     v = substr($0, 8, length($0) - 9)
@@ -46,12 +49,30 @@ awk -v fifo="$FIFO" -v q="'" '
     if (v != avant) change = 1
     $0 = "motd=<<" v ">>"
   }
+  /^(passwd|versions_accepted)=<<.*>>$/ {
+    cle = substr($0, 1, index($0, "=") - 1)
+    v = substr($0, length(cle) + 4, length($0) - length(cle) - 5)
+    if (index(v, ">>") || v ~ />$/) {
+      nom = (cle == "passwd") ? "Mot de passe administrateur" : "Versions acceptees"
+      print "ERREUR : reglage \"" nom "\" : il ne doit contenir ni >> ni finir par > (cela coupe le fichier de configuration de wesnothd)." > "/dev/stderr"
+      refus = 1
+    }
+  }
   /^fifo_path=/ { $0 = "fifo_path=\"" fifo "\"" }
   { print }
   END {
     if (change) print "TeamKit : guillemets droits ou >> remplaces dans le message d accueil (ils empechent les joueurs de se connecter)." > "/dev/stderr"
+    if (refus) exit 3
   }
-' "$CFG" > "$CFG.tmp" && mv -f "$CFG.tmp" "$CFG"
+' "$CFG" > "$CFG.tmp"
+CODE_AWK=$?
+if [ "$CODE_AWK" = 3 ]; then
+  rm -f "$CFG.tmp"
+  echo "ERREUR : wesnothd ne demarrerait pas avec ce reglage (voir la ligne au-dessus)."
+  echo "Corrige-le dans l'onglet Configuration d'AMP, puis relance."
+  exit 1
+fi
+[ "$CODE_AWK" = 0 ] && mv -f "$CFG.tmp" "$CFG"
 
 rm -f "$FIFO"
 # --pdeathsig : si ce script est tue net (SIGKILL), wesnothd recoit SIGTERM au
